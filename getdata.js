@@ -14,7 +14,7 @@ var http = require('http');
 var host = 'http://pokeapi.co';
 var api = '/api/v1/';
 var req = host+api;
-var maxPokemon = 718; //It's really 718, but for safety let's just do 717
+var maxPokemon = 718; //The last pokemon was 718
 var i = 1;
 
 console.log('Making data folder.')
