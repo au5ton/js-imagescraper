@@ -1,0 +1,19 @@
+{
+  "name": "js-grabpokemon",
+  "version": "1.0.0",
+  "description": "Gotta catch em all",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/au5ton/js-grabpokemon.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/au5ton/js-grabpokemon/issues"
+  },
+  "homepage": "https://github.com/au5ton/js-grabpokemon#readme",
+  "dependencies": {
+    "request": "^2.62.0"
+  }
+}
