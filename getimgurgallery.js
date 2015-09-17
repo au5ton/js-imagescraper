@@ -22,7 +22,7 @@ request({
     }
 }, function(err, response, body) {
     if(err) throw err;
-    fs.writeFile('data.json',body,function(err){
+    fs.writeFile('imgurdata.json',body,function(err){
         if (err) throw err;
     })
 });
