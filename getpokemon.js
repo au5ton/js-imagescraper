@@ -1,11 +1,13 @@
 /*
 
-    getdata.js
+    getpokemon.js
     Retreives and saves the sprite images of Pokemon from http://pokeapi.co/
 
-    Uses recursion to work with async stuff
+    Uses recursion to make everything boring and synchronous
 
 */
+
+var startTime = new Date();
 
 var request = require('request');
 var fs = require('fs');
@@ -16,6 +18,23 @@ var api = '/api/v1/';
 var req = host+api;
 var maxPokemon = 718; //The last pokemon was 718
 var i = 1;
+var limit;
+
+console.log(process.argv);
+if(process.argv[2] === 'max') {
+    limit = maxPokemon;
+}
+else if(!isNaN(parseInt(process.argv[2])) && typeof parseInt(process.argv[2]) === 'number'){
+    limit = process.argv[2];
+}
+else {
+    console.log('Please specify a limit. Ex: max, 42, 564');
+    process.exit();
+}
+
+process.on('exit', function() {
+    console.log('Finished operation in: '+((new Date() - startTime)/1000)+' seconds.');
+});
 
 console.log('Making data folder.')
 fs.mkdir('data', function() {
@@ -43,7 +62,7 @@ fs.mkdir('data', function() {
                         fs.writeFile('data/pokemon_'+i+'.png', data, 'binary', function (err) {
                             if (err) throw err;
                             console.log('It\'s saved!\n');
-                            if(i < maxPokemon) {
+                            if(i < limit) {
                                 i++;
                                 recursive();
                             }
