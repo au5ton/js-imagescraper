@@ -11,9 +11,11 @@ var request = require('request');
 var fs = require('fs');
 var http = require('http');
 
+var hostname = 'pokeapi.co'
 var host = 'http://pokeapi.co';
 var api = '/api/v1/';
 var req = host+api;
+var req2 = hostname+api;
 var maxPokemon = 717; //The last pokemon was 718
 //var i;
 
@@ -102,36 +104,117 @@ function getSpriteBinary(url,id) {
     }
     recursion();
 }
+var printCount = 0;
+function print(str) {
+    console.log('['+printCount+']: ', str);
+    printCount++;
+}
 
 console.log('Making data folder.');
 fs.mkdir('data_async', function() {
-    for(var i = 1; i < maxPokemon; i++) {
-        spritesDone.push(0);
-        setTimeout(function(){
-            request(req+'sprite/'+i+'/', function (error, response, body) {
-                if (!error && response.statusCode == 200) {
-                    body = JSON.parse(body);
-                    spritesDone[body.id] = 1;
-                    console.log(body.image);
-                    request(host+body.image)
-                    .on('error', function(err){
-                        //
-                    })
-                    .pipe(fs.createWriteStream('data/pokemon_'+body.id+'.png'));
+    console.log('Made data_async folder.');
+    for(var i = 1; i <= 100; i++) {
+
+        //Thanks: http://bit.ly/1NEv9Ck
+
+        function tryUntilSuccess(options, callback) {
+            var req = http.request(options, function(res) {
+                var data = '';
+                var result;
+
+                if(options.encoding) {
+                    res.setEncoding(options.encoding);
                 }
                 else {
-                    if(response) {
-                        console.log(response.statusCode);
-                    }
-                    else {
-                        console.log(response);
-                    }
+                    options.encoding = 'utf-8';
                 }
-            })
-        }, timeout);
-        timeout += 1000;
+
+                res.on('data', function(msg) {
+                    data += msg;
+                });
+                res.on('end', function() {
+                    try {
+                        if(options.encoding === 'utf-8') {
+                            result = JSON.parse(data);
+                        }
+                        else {
+                            result = data;
+                        }
+                        if(options.savedFilePath) {
+                            fs.writeFile(options.savedFilePath, result, 'binary', function (err) {
+                                if (err) throw err;
+                                console.log(options.savedFilePath+' saved!');
+                                callback(null, result);
+                            });
+                        }
+                        callback(null, result);
+                    }
+                    catch(err) {
+                        console.log('trying again: ', err);
+                        tryUntilSuccess(options, callback);
+                    }
+                });
+            });
+            req.end();
+
+            req.on('error', function(e) {
+                console.log('trying again: ', e);
+                tryUntilSuccess(options, callback);
+            });
+        }
+
+        // Use the standard callback pattern of err in first param, success in second
+        tryUntilSuccess({
+            host: hostname,
+            path: api+'sprite/'+i+'/'
+        },
+        function(err, res) {
+            if(err) throw err;
+            print('id: '+res.id+', img: '+hostname+res.image);
+            tryUntilSuccess({
+                host: hostname,
+                path: res.image,
+                encoding: 'binary',
+                savedFilePath: 'data_async/pokemon_'+res.id+'.png'
+            },
+            function(err, res) {
+                //
+            });
+
+            // request(host+res.image);
+            // .on('error', function(err){
+            //     //
+            // })
+            // .pipe(fs.createWriteStream('data_async/pokemon_'+res.id+'.png'));
+        });
+
+
     }
 });
+
+/*
+request(req+'sprite/'+i+'/', function (error, response, body) {
+if (!error && response.statusCode == 200) {
+body = JSON.parse(body);
+spritesDone[body.id] = 1;
+console.log(body.image);
+request(host+body.image)
+.on('error', function(err){
+//
+})
+.pipe(fs.createWriteStream('data_async/pokemon_'+body.id+'.png'));
+}
+else {
+if(response) {
+console.log(response.statusCode);
+}
+else {
+console.log(response);
+}
+}
+})
+*/
+
 
 // var timeout = 0;
 // for(var i = 1; i < maxPokemon; i++) {

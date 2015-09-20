@@ -1,3 +1,4 @@
 node_modules/
 data/
+data_async/
 npm-debug.log
